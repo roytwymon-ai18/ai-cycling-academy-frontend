@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { BarChart3, TrendingUp, Activity, Zap } from 'lucide-react';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export function Analytics({ user }) {
   const [analytics, setAnalytics] = useState(null);
@@ -14,7 +16,7 @@ export function Analytics({ user }) {
   const loadAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/analytics?days=${timeRange}`, {
+      const response = await fetch(`${API_BASE_URL}/analytics?days=${timeRange}`, {
         credentials: 'include'
       });
       

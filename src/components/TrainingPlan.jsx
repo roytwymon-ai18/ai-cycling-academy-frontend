@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.j
 import { Button } from '@/components/ui/button.jsx';
 import { Calendar, Target, TrendingUp, Clock, Zap } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 export default function TrainingPlan({ user }) {
   const [currentPlan, setCurrentPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ export default function TrainingPlan({ user }) {
 
   const fetchCurrentPlan = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/training-plans/current', {
+      const response = await fetch(`${API_BASE_URL}/training-plans/current`, {
         credentials: 'include'
       });
       
@@ -31,7 +33,7 @@ export default function TrainingPlan({ user }) {
 
   const createNewPlan = async (planData) => {
     try {
-      const response = await fetch('http://localhost:5000/api/training-plans/create', {
+      const response = await fetch(`${API_BASE_URL}/training-plans/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

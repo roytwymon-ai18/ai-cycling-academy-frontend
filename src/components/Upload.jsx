@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 export default function Upload() {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -63,7 +65,7 @@ export default function Upload() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:5000/api/upload/preview', {
+      const response = await fetch(`${API_BASE_URL}/upload/preview`, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -96,7 +98,7 @@ export default function Upload() {
       const formData = new FormData();
       formData.append('file', preview.file);
 
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         credentials: 'include',
         body: formData

@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 export default function Coach({ user }) {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -38,7 +40,7 @@ export default function Coach({ user }) {
 
   const loadInsights = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/coaching/insights', {
+      const response = await fetch(`${API_BASE_URL}/coaching/insights`, {
         credentials: 'include'
       });
       
@@ -67,7 +69,7 @@ export default function Coach({ user }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/coaching/chat', {
+      const response = await fetch(`${API_BASE_URL}/coaching/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

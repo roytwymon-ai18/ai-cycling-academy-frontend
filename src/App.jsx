@@ -29,7 +29,7 @@ import TrainingPlan from './components/TrainingPlan.jsx'
 import './App.css'
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:5000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 // Login Component
 function LoginScreen({ onLogin }) {
@@ -415,7 +415,7 @@ function Profile({ user, onLogout }) {
               onClick={() => {
                 const goals = prompt('Enter your training goals:', user.training_goals || '');
                 if (goals !== null) {
-                  fetch('http://localhost:5000/api/coaching/goals', {
+                  fetch(`${API_BASE_URL}/coaching/goals`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
