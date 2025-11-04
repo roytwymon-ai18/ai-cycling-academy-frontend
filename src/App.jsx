@@ -484,73 +484,7 @@ function Dashboard({ user }) {
 
 // Analytics Component is imported from separate file
 
-// Profile Component (Placeholder)
-function Profile({ user, onLogout }) {
-  return (
-    <div className="space-y-6 pb-24">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <User className="h-5 w-5" />
-            <span>Profile</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-gray-600">Username</p>
-            <p className="text-lg font-medium">{user.username}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Email</p>
-            <p className="text-lg font-medium">{user.email}</p>
-          </div>
-          {user.current_ftp && (
-            <div>
-              <p className="text-sm text-gray-600">Current FTP</p>
-              <p className="text-lg font-medium">{user.current_ftp}W</p>
-            </div>
-          )}
-          {user.weight && (
-            <div>
-              <p className="text-sm text-gray-600">Weight</p>
-              <p className="text-lg font-medium">{user.weight}kg</p>
-            </div>
-          )}
-          <div className="border-t pt-4 mt-4">
-            <p className="text-sm text-gray-600 mb-2">Training Goals</p>
-            <p className="text-base">{user.training_goals || 'No goals set yet. Add your goals to get personalized coaching!'}</p>
-            <Button 
-              onClick={() => {
-                const goals = prompt('Enter your training goals:', user.training_goals || '');
-                if (goals !== null) {
-                  fetch(`${API_BASE_URL}/coaching/goals`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ goals })
-                  }).then(() => window.location.reload());
-                }
-              }}
-              variant="outline"
-              className="mt-2 w-full"
-            >
-              {user.training_goals ? 'Update Goals' : 'Set Goals'}
-            </Button>
-          </div>
-          <div className="pt-4">
-            <Button 
-              onClick={onLogout}
-              variant="outline" 
-              className="w-full border-red-500 text-red-500 hover:bg-red-50"
-            >
-              Sign Out
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
+// Profile Component is imported from separate file
 
 // Bottom Navigation
 function BottomNav({ activeTab, onTabChange }) {
