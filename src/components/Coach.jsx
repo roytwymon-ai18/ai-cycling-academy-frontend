@@ -23,8 +23,8 @@ export default function Coach({ user }) {
     
     // Add welcome message with goals context
     const welcomeMsg = user?.training_goals 
-      ? `Hi ${user.username}! 👋 I'm your AI cycling coach. I see your goal is: "${user.training_goals}". I've analyzed your recent rides and I'm here to help you achieve it. What would you like to know?`
-      : `Hi ${user?.username || 'there'}! 👋 I'm your AI cycling coach. I've analyzed your recent rides and I'm here to help you improve. Set your training goals in your Profile to get more personalized coaching!`;
+      ? `Hi ${user.username}! 👋 I'm Coach Manee, your personalized AI cycling coach. I see your goal is: "${user.training_goals}". I've analyzed your recent rides and I'm here to help you achieve it. I remember all our conversations, so I can provide increasingly personalized guidance. What would you like to know?`
+      : `Hi ${user?.username || 'there'}! 👋 I'm Coach Manee, your personalized AI cycling coach. I've analyzed your recent rides and I'm here to help you improve. I remember all our conversations to provide better coaching over time. Set your training goals in your Profile to get even more personalized advice!`;
     
     setMessages([{
       role: 'assistant',
