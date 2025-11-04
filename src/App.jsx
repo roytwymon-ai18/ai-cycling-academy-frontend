@@ -26,6 +26,7 @@ import UploadRides from './components/Upload.jsx'
 import AICoach from './components/Coach.jsx'
 import Analytics from './components/Analytics.jsx'
 import TrainingPlan from './components/TrainingPlan.jsx'
+import Profile from './components/Profile.jsx'
 import './App.css'
 
 // API Configuration
