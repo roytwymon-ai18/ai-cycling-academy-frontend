@@ -33,11 +33,15 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 // Login Component
 function LoginScreen({ onLogin }) {
+  const [isRegisterMode, setIsRegisterMode] = useState(false)
   const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -68,18 +72,78 @@ function LoginScreen({ onLogin }) {
     }
   }
 
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+    setSuccess('')
+    
+    // Validation
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setIsLoading(false)
+      return
+    }
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setIsLoading(false)
+      return
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ username, email, password })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        setSuccess('Registration successful! Logging you in...')
+        // Auto-login after successful registration
+        setTimeout(async () => {
+          const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ username, password })
+          })
+          const loginData = await loginResponse.json()
+          if (loginResponse.ok) {
+            onLogin(loginData.user)
+          }
+        }, 1500)
+      } else {
+        setError(data.error || 'Registration failed')
+      }
+    } catch (err) {
+      setError('Connection error. Please check if the backend is running.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader className="text-center">
           <img src={aiCyclistLogo} alt="AI Cycling Academy" className="h-16 w-auto mx-auto mb-4" />
-          <CardTitle className="text-2xl text-white">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl text-white">
+            {isRegisterMode ? 'Create Account' : 'Welcome Back'}
+          </CardTitle>
           <CardDescription className="text-blue-100">
-            Sign in to your AI cycling coach
+            {isRegisterMode ? 'Join your AI cycling coach' : 'Sign in to your AI cycling coach'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={isRegisterMode ? handleRegister : handleLogin} className="space-y-4">
             <div>
               <Input
                 type="text"
@@ -90,6 +154,18 @@ function LoginScreen({ onLogin }) {
                 required
               />
             </div>
+            {isRegisterMode && (
+              <div>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-blue-200"
+                  required
+                />
+              </div>
+            )}
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -107,9 +183,26 @@ function LoginScreen({ onLogin }) {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {isRegisterMode && (
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-blue-200 pr-10"
+                  required
+                />
+              </div>
+            )}
             {error && (
               <div className="text-red-300 text-sm bg-red-500/20 p-3 rounded-lg">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="text-green-300 text-sm bg-green-500/20 p-3 rounded-lg">
+                {success}
               </div>
             )}
             <Button 
@@ -117,16 +210,30 @@ function LoginScreen({ onLogin }) {
               className="w-full bg-orange-500 hover:bg-orange-600 text-white"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? (isRegisterMode ? 'Creating Account...' : 'Signing in...') : (isRegisterMode ? 'Create Account' : 'Sign In')}
             </Button>
           </form>
           <div className="mt-6 text-center">
-            <p className="text-blue-200 text-sm mb-2">Demo Accounts:</p>
-            <div className="space-y-1 text-xs text-blue-300">
-              <p><strong>Demo:</strong> demo / demo123 (with sample data)</p>
-              <p><strong>User:</strong> user / user123 (fresh account)</p>
-            </div>
+            <button
+              onClick={() => {
+                setIsRegisterMode(!isRegisterMode)
+                setError('')
+                setSuccess('')
+              }}
+              className="text-blue-200 hover:text-white text-sm underline"
+            >
+              {isRegisterMode ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+            </button>
           </div>
+          {!isRegisterMode && (
+            <div className="mt-4 text-center">
+              <p className="text-blue-200 text-sm mb-2">Demo Accounts:</p>
+              <div className="space-y-1 text-xs text-blue-300">
+                <p><strong>Demo:</strong> demo / demo123 (with sample data)</p>
+                <p><strong>User:</strong> user / user123 (fresh account)</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
