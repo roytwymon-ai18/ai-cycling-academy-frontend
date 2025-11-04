@@ -336,7 +336,7 @@ export default function Upload() {
           Connect your Strava account to automatically sync your rides
         </p>
         <button className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-600">
-          Connect Strava (Coming Soon)
+          Connect Strava
         </button>
       </div>
     </div>
