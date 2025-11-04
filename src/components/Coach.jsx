@@ -7,6 +7,11 @@ export default function Coach({ user }) {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [insights, setInsights] = useState(null);
+  const [onboardingStatus, setOnboardingStatus] = useState({
+    completed: false,
+    step: 0,
+    totalSteps: 12
+  });
   const messagesEndRef = useRef(null);
 
   const suggestedQuestions = [
@@ -18,10 +23,131 @@ export default function Coach({ user }) {
   ];
 
   useEffect(() => {
+    // Load client profile to check onboarding status
+    loadClientProfile();
+    
     // Load automatic insights when component mounts
     loadInsights();
-    
-    // Add welcome message with goals context
+  }, [user]);
+
+  useEffect(() => {
+    // Scroll to bottom when new messages arrive
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const loadClientProfile = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/coaching/profile`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const profile = data.profile;
+        
+        setOnboardingStatus({
+          completed: profile.onboarding_completed,
+          step: profile.onboarding_step,
+          totalSteps: 12
+        });
+
+        // If onboarding not completed, start the interview
+        if (!profile.onboarding_completed) {
+          const welcomeMsg = `Hi ${user?.username || 'there'}! 👋 I'm Coach Manee, your personalized AI cycling coach.
+
+Before we dive into training plans and performance metrics, I'd love to get to know YOU as a cyclist. This will help me provide truly personalized coaching that fits your goals, style, and life.
+
+This quick interview has 12 questions — it'll take about 5-10 minutes. Ready to start? 🚴`;
+          
+          setMessages([{
+            role: 'assistant',
+            content: welcomeMsg,
+            timestamp: new Date()
+          }]);
+
+          // If step is 0, trigger first question
+          if (profile.onboarding_step === 0) {
+            setTimeout(() => startOnboarding(), 1000);
+          }
+        } else {
+          // Load chat history for returning users
+          loadChatHistory();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+      // Default welcome message if profile load fails
+      showDefaultWelcome();
+    }
+  };
+
+  const startOnboarding = async () => {
+    // Send empty message to trigger first question
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/coaching/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ message: 'START_ONBOARDING' })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const aiMessage = {
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
+        
+        if (data.onboarding_step !== undefined) {
+          setOnboardingStatus(prev => ({
+            ...prev,
+            step: data.onboarding_step,
+            completed: data.onboarding_completed || false
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Failed to start onboarding:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadChatHistory = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/coaching/chat/history`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.messages && data.messages.length > 0) {
+          // Load last 20 messages
+          const recentMessages = data.messages.slice(-20).map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.created_at)
+          }));
+          setMessages(recentMessages);
+        } else {
+          showDefaultWelcome();
+        }
+      } else {
+        showDefaultWelcome();
+      }
+    } catch (error) {
+      console.error('Failed to load chat history:', error);
+      showDefaultWelcome();
+    }
+  };
+
+  const showDefaultWelcome = () => {
     const welcomeMsg = user?.training_goals 
       ? `Hi ${user.username}! 👋 I'm Coach Manee, your personalized AI cycling coach. I see your goal is: "${user.training_goals}". I've analyzed your recent rides and I'm here to help you achieve it. I remember all our conversations, so I can provide increasingly personalized guidance. What would you like to know?`
       : `Hi ${user?.username || 'there'}! 👋 I'm Coach Manee, your personalized AI cycling coach. I've analyzed your recent rides and I'm here to help you improve. I remember all our conversations to provide better coaching over time. Set your training goals in your Profile to get even more personalized advice!`;
@@ -31,12 +157,7 @@ export default function Coach({ user }) {
       content: welcomeMsg,
       timestamp: new Date()
     }]);
-  }, [user]);
-
-  useEffect(() => {
-    // Scroll to bottom when new messages arrive
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  };
 
   const loadInsights = async () => {
     try {
@@ -88,6 +209,20 @@ export default function Coach({ user }) {
           timestamp: new Date()
         };
         setMessages(prev => [...prev, aiMessage]);
+
+        // Update onboarding status if in progress
+        if (data.onboarding_step !== undefined) {
+          setOnboardingStatus({
+            step: data.onboarding_step,
+            completed: data.onboarding_completed || false,
+            totalSteps: 12
+          });
+        }
+
+        // Reload insights after onboarding completion
+        if (data.onboarding_completed) {
+          setTimeout(() => loadInsights(), 1000);
+        }
       } else {
         throw new Error(data.error || 'Failed to get response');
       }
@@ -118,10 +253,26 @@ export default function Coach({ user }) {
       <div className="p-4 border-b bg-white">
         <h2 className="text-xl font-bold mb-1">🤖 AI Coach</h2>
         <p className="text-sm text-gray-600">Your personal cycling coach powered by AI</p>
+        
+        {/* Onboarding Progress Bar */}
+        {!onboardingStatus.completed && onboardingStatus.step > 0 && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs text-gray-600 mb-1">
+              <span>Getting to know you...</span>
+              <span>{onboardingStatus.step} / {onboardingStatus.totalSteps}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(onboardingStatus.step / onboardingStatus.totalSteps) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Automatic Insights */}
-      {insights && (
+      {/* Automatic Insights - only show after onboarding */}
+      {onboardingStatus.completed && insights && (
         <div className="p-4 bg-blue-50 border-b border-blue-200">
           <h3 className="font-bold text-blue-900 mb-2">📊 Recent Training Insights</h3>
           <div className="space-y-2 text-sm">
@@ -184,8 +335,8 @@ export default function Coach({ user }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested Questions */}
-      {messages.length <= 1 && (
+      {/* Suggested Questions - only show after onboarding and if few messages */}
+      {onboardingStatus.completed && messages.length <= 2 && (
         <div className="p-4 border-t bg-gray-50">
           <p className="text-sm font-semibold text-gray-700 mb-2">Suggested questions:</p>
           <div className="space-y-2">
@@ -209,7 +360,7 @@ export default function Coach({ user }) {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Ask your coach anything..."
+            placeholder={!onboardingStatus.completed ? "Type your answer..." : "Ask your coach anything..."}
             disabled={isLoading}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           />

@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef } from 'react'
+import { kmToMiles, metersToFeet } from '../utils/units'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';;
 
-export default function Upload() {
+export default function Upload({ onNavigate }) {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(null);
@@ -152,7 +153,7 @@ export default function Upload() {
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
                 <span className="text-gray-600">Distance:</span>
-                <span className="ml-2 font-semibold">{uploadResult.distance.toFixed(1)} km</span>
+                <span className="ml-2 font-semibold">{kmToMiles(uploadResult.distance).toFixed(1)} mi</span>
               </div>
               <div>
                 <span className="text-gray-600">Duration:</span>
@@ -160,7 +161,7 @@ export default function Upload() {
               </div>
               <div>
                 <span className="text-gray-600">Elevation:</span>
-                <span className="ml-2 font-semibold">{uploadResult.elevation_gain} m</span>
+                <span className="ml-2 font-semibold">{Math.round(metersToFeet(uploadResult.elevation_gain))} ft</span>
               </div>
               <div>
                 <span className="text-gray-600">Avg Power:</span>
@@ -213,7 +214,7 @@ export default function Upload() {
               </div>
               <div>
                 <span className="text-gray-600">Distance:</span>
-                <span className="ml-2 font-semibold">{preview.distance.toFixed(1)} km</span>
+                <span className="ml-2 font-semibold">{kmToMiles(preview.distance).toFixed(1)} mi</span>
               </div>
               <div>
                 <span className="text-gray-600">Duration:</span>
@@ -221,7 +222,7 @@ export default function Upload() {
               </div>
               <div>
                 <span className="text-gray-600">Elevation:</span>
-                <span className="ml-2 font-semibold">{preview.elevation_gain} m</span>
+                <span className="ml-2 font-semibold">{Math.round(metersToFeet(preview.elevation_gain))} ft</span>
               </div>
               {preview.avg_power > 0 && (
                 <div>
@@ -335,7 +336,10 @@ export default function Upload() {
         <p className="text-sm text-gray-600 mb-3">
           Connect your Strava account to automatically sync your rides
         </p>
-        <button className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-600">
+        <button 
+          onClick={() => onNavigate && onNavigate('profile')}
+          className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-600"
+        >
           Connect Strava
         </button>
       </div>

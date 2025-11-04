@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { BarChart3, TrendingUp, Activity, Zap } from 'lucide-react';
+import { kmToMiles } from '../utils/units';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -90,7 +91,7 @@ export function Analytics({ user }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Distance</p>
-                <p className="text-3xl font-bold">{analytics?.total_distance || 0}<span className="text-lg">km</span></p>
+                <p className="text-3xl font-bold">{analytics?.total_distance ? kmToMiles(analytics.total_distance).toFixed(0) : 0}<span className="text-lg">mi</span></p>
               </div>
               <TrendingUp className="h-10 w-10 text-green-600 opacity-20" />
             </div>

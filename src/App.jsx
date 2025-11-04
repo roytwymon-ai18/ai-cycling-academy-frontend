@@ -28,6 +28,7 @@ import Analytics from './components/Analytics.jsx'
 import TrainingPlan from './components/TrainingPlan.jsx'
 import Profile from './components/Profile.jsx'
 import './App.css'
+import { kmToMiles, metersToFeet } from './utils/units'
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
@@ -316,8 +317,8 @@ function Dashboard({ user }) {
                 <p className="text-sm text-gray-600">Distance</p>
               </div>
               <p className="text-2xl font-bold">
-                {summary.total_distance?.toFixed(0) || 0}
-                <span className="text-sm text-gray-500 ml-1">km</span>
+                {summary.total_distance ? kmToMiles(summary.total_distance).toFixed(0) : 0}
+                <span className="text-sm text-gray-500 ml-1">mi</span>
               </p>
             </div>
           </CardContent>
@@ -386,13 +387,13 @@ function Dashboard({ user }) {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{ride.name}</p>
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <span>{ride.distance?.toFixed(1)}km</span>
+                        <span>{ride.distance ? kmToMiles(ride.distance).toFixed(1) : 0}mi</span>
                         <span>•</span>
                         <span>{Math.round(ride.duration/60)}min</span>
                         {ride.elevation_gain && (
                           <>
                             <span>•</span>
-                            <span>{ride.elevation_gain}m</span>
+                            <span>{Math.round(metersToFeet(ride.elevation_gain))}ft</span>
                           </>
                         )}
                       </div>
@@ -423,7 +424,10 @@ function Dashboard({ user }) {
             <div className="text-center py-8">
               <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 mb-4">No rides yet. Upload your cycling data to get started!</p>
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button 
+                onClick={() => setActiveTab('upload')}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload First Ride
               </Button>
@@ -453,15 +457,15 @@ function Dashboard({ user }) {
               <div className="space-y-1">
                 <p className="text-sm text-gray-600">Elevation</p>
                 <p className="text-2xl font-bold">
-                  {summary.total_elevation?.toFixed(0) || 0}
-                  <span className="text-sm text-gray-500 ml-1">m</span>
+                  {summary.total_elevation ? Math.round(metersToFeet(summary.total_elevation)) : 0}
+                  <span className="text-sm text-gray-500 ml-1">ft</span>
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-gray-600">Avg Speed</p>
                 <p className="text-2xl font-bold">
-                  {summary.avg_speed?.toFixed(1) || 0}
-                  <span className="text-sm text-gray-500 ml-1">km/h</span>
+                  {summary.avg_speed ? kmToMiles(summary.avg_speed).toFixed(1) : 0}
+                  <span className="text-sm text-gray-500 ml-1">mph</span>
                 </p>
               </div>
               <div className="space-y-1">
@@ -579,7 +583,7 @@ function App() {
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
         {activeTab === 'dashboard' && <Dashboard user={user} />}
-        {activeTab === 'upload' && <UploadRides />}
+        {activeTab === 'upload' && <UploadRides onNavigate={setActiveTab} />}
         {activeTab === 'plan' && <TrainingPlan user={user} />}
         {activeTab === 'coach' && <AICoach user={user} />}
         {activeTab === 'analytics' && <Analytics user={user} />}
