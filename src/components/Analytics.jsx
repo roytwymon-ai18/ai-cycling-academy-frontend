@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { BarChart3, TrendingUp, Activity, Zap } from 'lucide-react';
+import { BarChart3, TrendingUp, Activity, Zap, Gauge, Flame, ArrowUp, ArrowDown } from 'lucide-react';
 import { kmToMiles } from '../utils/units';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -168,7 +168,7 @@ export function Analytics({ user }) {
         </Card>
       )}
 
-      {/* Summary Stats */}
+      {/* Summary Stats - Row 1 */}
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-6">
@@ -193,7 +193,10 @@ export function Analytics({ user }) {
             </div>
           </CardContent>
         </Card>
+      </div>
 
+      {/* Summary Stats - Row 2: Power Metrics */}
+      <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -210,25 +213,180 @@ export function Analytics({ user }) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total TSS</p>
-                <p className="text-3xl font-bold">{analytics?.total_tss || 0}</p>
+                <p className="text-sm text-gray-600">Peak Power</p>
+                <p className="text-3xl font-bold">{analytics?.max_power || 0}<span className="text-lg">W</span></p>
               </div>
-              <BarChart3 className="h-10 w-10 text-purple-600 opacity-20" />
+              <Zap className="h-10 w-10 text-red-600 opacity-20" />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Summary Stats - Row 3: Speed Metrics */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Avg Speed</p>
+                <p className="text-3xl font-bold">{analytics?.avg_speed ? kmToMiles(analytics.avg_speed).toFixed(1) : 0}<span className="text-lg">mph</span></p>
+              </div>
+              <Gauge className="h-10 w-10 text-blue-600 opacity-20" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Top Speed</p>
+                <p className="text-3xl font-bold">{analytics?.max_speed ? kmToMiles(analytics.max_speed).toFixed(1) : 0}<span className="text-lg">mph</span></p>
+              </div>
+              <Gauge className="h-10 w-10 text-purple-600 opacity-20" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Summary Stats - Row 4: Training Metrics */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Avg Intensity</p>
+                <p className="text-3xl font-bold">{analytics?.avg_intensity || 0}<span className="text-lg">%</span></p>
+                <p className="text-xs text-gray-500 mt-1">of FTP</p>
+              </div>
+              <Activity className="h-10 w-10 text-yellow-600 opacity-20" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total Calories</p>
+                <p className="text-3xl font-bold">{analytics?.total_calories ? (analytics.total_calories / 1000).toFixed(1) : 0}<span className="text-lg">k</span></p>
+              </div>
+              <Flame className="h-10 w-10 text-orange-600 opacity-20" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Progress Comparison */}
+      {analytics?.progress_comparison && Object.keys(analytics.progress_comparison).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5" />
+              <span>Progress Comparison</span>
+            </CardTitle>
+            <p className="text-sm text-gray-600">vs. Previous {timeRange} Days</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              {analytics.progress_comparison.distance && (
+                <ProgressCard
+                  label="Distance"
+                  current={kmToMiles(analytics.progress_comparison.distance.current).toFixed(1)}
+                  previous={kmToMiles(analytics.progress_comparison.distance.previous).toFixed(1)}
+                  change={analytics.progress_comparison.distance.change_percent}
+                  unit="mi"
+                />
+              )}
+              {analytics.progress_comparison.avg_power && (
+                <ProgressCard
+                  label="Avg Power"
+                  current={analytics.progress_comparison.avg_power.current}
+                  previous={analytics.progress_comparison.avg_power.previous}
+                  change={analytics.progress_comparison.avg_power.change_percent}
+                  unit="W"
+                />
+              )}
+              {analytics.progress_comparison.avg_intensity && (
+                <ProgressCard
+                  label="Avg Intensity"
+                  current={analytics.progress_comparison.avg_intensity.current.toFixed(1)}
+                  previous={analytics.progress_comparison.avg_intensity.previous.toFixed(1)}
+                  change={analytics.progress_comparison.avg_intensity.change_percent}
+                  unit="%"
+                />
+              )}
+              {analytics.progress_comparison.total_tss && (
+                <ProgressCard
+                  label="Total TSS"
+                  current={analytics.progress_comparison.total_tss.current}
+                  previous={analytics.progress_comparison.total_tss.previous}
+                  change={analytics.progress_comparison.total_tss.change_percent}
+                  unit=""
+                />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Monthly Stats */}
+      {analytics?.monthly_stats && analytics.monthly_stats.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <BarChart3 className="h-5 w-5" />
+              <span>Monthly Statistics</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analytics.monthly_stats.map((month, index) => (
+                <div key={index} className="border-b last:border-b-0 pb-4 last:pb-0">
+                  <div className="font-semibold text-lg mb-2">{month.month}</div>
+                  <div className="grid grid-cols-3 gap-3 text-sm">
+                    <div>
+                      <p className="text-gray-600">Rides</p>
+                      <p className="font-bold">{month.rides}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Distance</p>
+                      <p className="font-bold">{kmToMiles(month.distance).toFixed(0)} mi</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Avg Power</p>
+                      <p className="font-bold">{month.avg_power}W</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Avg Speed</p>
+                      <p className="font-bold">{kmToMiles(month.avg_speed).toFixed(1)} mph</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Peak Power</p>
+                      <p className="font-bold">{month.max_power}W</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">TSS</p>
+                      <p className="font-bold">{month.total_tss}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Training Load Chart */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5" />
-            <span>Training Load Trend</span>
+            <span>Weekly Performance</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <TrainingLoadChart data={analytics?.weekly_tss || []} />
+          <WeeklyPerformanceChart data={analytics?.weekly_tss || []} />
         </CardContent>
       </Card>
 
@@ -290,12 +448,21 @@ export function Analytics({ user }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {analytics?.insights?.map((insight, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
-                <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2" />
-                <p className="text-sm text-gray-700">{insight}</p>
-              </div>
-            )) || (
+            {analytics?.insights?.map((insight, index) => {
+              const levelColors = {
+                positive: 'bg-green-50 border-l-4 border-l-green-500',
+                warning: 'bg-yellow-50 border-l-4 border-l-yellow-500',
+                neutral: 'bg-blue-50 border-l-4 border-l-blue-500'
+              };
+              const bgColor = levelColors[insight.level] || 'bg-blue-50 border-l-4 border-l-blue-500';
+              
+              return (
+                <div key={index} className={`flex items-start space-x-3 p-3 rounded-lg ${bgColor}`}>
+                  <div className="flex-shrink-0 w-2 h-2 rounded-full mt-2" />
+                  <p className="text-sm text-gray-700">{insight.message || insight}</p>
+                </div>
+              );
+            }) || (
               <p className="text-gray-500 text-center py-4">
                 Upload more rides to get personalized insights
               </p>
@@ -307,12 +474,37 @@ export function Analytics({ user }) {
   );
 }
 
-// Training Load Chart Component
-function TrainingLoadChart({ data }) {
+// Progress Card Component
+function ProgressCard({ label, current, previous, change, unit }) {
+  const isPositive = change > 0;
+  const isNegative = change < 0;
+  
+  return (
+    <div className="p-4 bg-gray-50 rounded-lg">
+      <p className="text-sm text-gray-600 mb-1">{label}</p>
+      <div className="flex items-baseline space-x-2">
+        <p className="text-2xl font-bold">{current}{unit}</p>
+        {change !== 0 && (
+          <div className={`flex items-center space-x-1 text-sm font-medium ${
+            isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-600'
+          }`}>
+            {isPositive && <ArrowUp className="h-4 w-4" />}
+            {isNegative && <ArrowDown className="h-4 w-4" />}
+            <span>{Math.abs(change).toFixed(1)}%</span>
+          </div>
+        )}
+      </div>
+      <p className="text-xs text-gray-500 mt-1">vs. {previous}{unit}</p>
+    </div>
+  );
+}
+
+// Weekly Performance Chart Component
+function WeeklyPerformanceChart({ data }) {
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No training load data available
+        No weekly performance data available
       </div>
     );
   }
@@ -320,15 +512,20 @@ function TrainingLoadChart({ data }) {
   const maxTSS = Math.max(...data.map(d => d.tss), 100);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex items-end justify-between h-48 space-x-2">
         {data.map((week, index) => (
-          <div key={index} className="flex-1 flex flex-col items-center justify-end">
+          <div key={index} className="flex-1 flex flex-col items-center justify-end group">
             <div 
-              className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t transition-all hover:opacity-80"
+              className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t transition-all hover:opacity-80 cursor-pointer relative"
               style={{ height: `${(week.tss / maxTSS) * 100}%` }}
-              title={`Week ${week.week}: ${week.tss} TSS`}
-            />
+            >
+              <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                <div>TSS: {week.tss}</div>
+                {week.avg_speed > 0 && <div>Avg Speed: {kmToMiles(week.avg_speed).toFixed(1)} mph</div>}
+                {week.max_power > 0 && <div>Peak: {week.max_power}W</div>}
+              </div>
+            </div>
             <div className="text-xs text-gray-500 mt-2">W{week.week}</div>
           </div>
         ))}
