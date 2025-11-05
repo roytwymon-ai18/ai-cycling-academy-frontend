@@ -9,10 +9,31 @@ export function Analytics({ user }) {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30'); // 30, 90, 180, 365 days
+  const [lastRideAnalysis, setLastRideAnalysis] = useState(null);
+  const [analysisLoading, setAnalysisLoading] = useState(true);
 
   useEffect(() => {
     loadAnalytics();
+    loadLastRideAnalysis();
   }, [timeRange]);
+
+  const loadLastRideAnalysis = async () => {
+    try {
+      setAnalysisLoading(true);
+      const response = await fetch(`${API_BASE_URL}/analytics/last-ride-analysis`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setLastRideAnalysis(data);
+      }
+    } catch (error) {
+      console.error('Failed to load last ride analysis:', error);
+    } finally {
+      setAnalysisLoading(false);
+    }
+  };
 
   const loadAnalytics = async () => {
     try {
@@ -71,6 +92,81 @@ export function Analytics({ user }) {
           </button>
         ))}
       </div>
+
+      {/* Last Ride Analysis */}
+      {analysisLoading ? (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-center h-32">
+              <div className="text-gray-500">Analyzing your last ride...</div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : lastRideAnalysis && lastRideAnalysis.ride ? (
+        <Card className="border-l-4 border-l-blue-600">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center space-x-2">
+                  <Zap className="h-5 w-5 text-blue-600" />
+                  <span>Last Ride Analysis</span>
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">
+                  {lastRideAnalysis.ride.name} • {new Date(lastRideAnalysis.ride.date).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-blue-600">{kmToMiles(lastRideAnalysis.ride.distance).toFixed(1)} mi</p>
+                <p className="text-sm text-gray-600">{Math.floor(lastRideAnalysis.ride.duration / 60)} min</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {/* Key Metrics */}
+            <div className="grid grid-cols-3 gap-4 mb-6 pb-6 border-b">
+              {lastRideAnalysis.ride.avg_power && (
+                <div>
+                  <p className="text-sm text-gray-600">Avg Power</p>
+                  <p className="text-xl font-bold">{lastRideAnalysis.ride.avg_power}W</p>
+                </div>
+              )}
+              {lastRideAnalysis.ride.avg_heart_rate && (
+                <div>
+                  <p className="text-sm text-gray-600">Avg HR</p>
+                  <p className="text-xl font-bold">{lastRideAnalysis.ride.avg_heart_rate} bpm</p>
+                </div>
+              )}
+              {lastRideAnalysis.ride.training_stress_score && (
+                <div>
+                  <p className="text-sm text-gray-600">TSS</p>
+                  <p className="text-xl font-bold">{lastRideAnalysis.ride.training_stress_score}</p>
+                </div>
+              )}
+            </div>
+
+            {/* AI Analysis */}
+            {lastRideAnalysis.analysis && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Coach's Insights</h3>
+                <div className="prose prose-sm max-w-none">
+                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                    {lastRideAnalysis.analysis}
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center text-gray-500 py-8">
+              <Activity className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p>No rides yet. Upload your first ride to get personalized insights!</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 gap-4">

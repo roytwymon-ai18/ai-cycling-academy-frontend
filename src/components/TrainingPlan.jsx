@@ -16,13 +16,13 @@ export default function TrainingPlan({ user }) {
 
   const fetchCurrentPlan = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/training-plans/current`, {
+      const response = await fetch(`${API_BASE_URL}/training-plan/current`, {
         credentials: 'include'
       });
       
       if (response.ok) {
         const data = await response.json();
-        setCurrentPlan(data.plan);
+        setCurrentPlan(data);
       }
     } catch (error) {
       console.error('Error fetching plan:', error);
@@ -33,7 +33,8 @@ export default function TrainingPlan({ user }) {
 
   const createNewPlan = async (planData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/training-plans/create`, {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/training-plan/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -42,11 +43,13 @@ export default function TrainingPlan({ user }) {
       
       if (response.ok) {
         const data = await response.json();
-        setCurrentPlan(data.plan);
+        setCurrentPlan(data);
         setShowCreateForm(false);
       }
     } catch (error) {
       console.error('Error creating plan:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -227,18 +230,99 @@ export default function TrainingPlan({ user }) {
         </CardContent>
       </Card>
 
-      {/* Workout Calendar Placeholder */}
+      {/* Week Focus */}
+      {currentPlan.week_focus && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex items-start space-x-3">
+              <Target className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-blue-900 mb-1">This Week's Focus</h3>
+                <p className="text-blue-800">{currentPlan.week_focus}</p>
+                {currentPlan.periodization_phase && (
+                  <p className="text-sm text-blue-600 mt-2">
+                    Phase: {currentPlan.periodization_phase} • Target TSS: {currentPlan.weekly_tss_target}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 7-Day Workout Plan */}
       <Card>
         <CardHeader>
-          <CardTitle>This Week's Workouts</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <Calendar className="h-5 w-5" />
+            <span>Next 7 Days</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-            <p>Workout calendar view coming soon...</p>
-            <p className="text-sm mt-2">
-              Your personalized workouts will appear here
-            </p>
+          <div className="space-y-4">
+            {currentPlan.days && currentPlan.days.map((day, index) => (
+              <div
+                key={index}
+                className={`p-4 rounded-lg border-2 ${
+                  index === 0
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 bg-white'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h4 className="font-semibold text-lg">{day.day}</h4>
+                    <p className="text-sm text-gray-600">
+                      {new Date(day.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                      {day.workout_type}
+                    </span>
+                    {day.tss > 0 && (
+                      <p className="text-sm text-gray-600 mt-1">TSS: {day.tss}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Clock className="h-4 w-4 text-gray-500" />
+                    <span>{day.duration_minutes > 0 ? `${day.duration_minutes} min` : 'Rest'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Zap className="h-4 w-4 text-gray-500" />
+                    <span>{day.intensity}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-700">{day.description}</p>
+                  
+                  {day.focus && (
+                    <div className="bg-gray-50 p-2 rounded">
+                      <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                        Focus
+                      </p>
+                      <p className="text-sm text-gray-700">{day.focus}</p>
+                    </div>
+                  )}
+
+                  {day.coaching_notes && (
+                    <div className="bg-yellow-50 p-2 rounded border border-yellow-200">
+                      <p className="text-xs font-medium text-yellow-800 uppercase tracking-wide mb-1">
+                        💡 Coach's Notes
+                      </p>
+                      <p className="text-sm text-yellow-900">{day.coaching_notes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
