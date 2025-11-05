@@ -34,6 +34,7 @@ export default function TrainingPlan({ user }) {
   const createNewPlan = async (planData) => {
     try {
       setLoading(true);
+      console.log('Creating training plan with data:', planData);
       const response = await fetch(`${API_BASE_URL}/training-plan/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,13 +42,21 @@ export default function TrainingPlan({ user }) {
         body: JSON.stringify(planData)
       });
       
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Plan generated:', data);
         setCurrentPlan(data);
         setShowCreateForm(false);
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Error response:', response.status, errorData);
+        alert(`Failed to generate plan: ${errorData.error || response.statusText}`);
       }
     } catch (error) {
       console.error('Error creating plan:', error);
+      alert(`Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
