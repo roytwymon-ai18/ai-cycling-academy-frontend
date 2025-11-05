@@ -282,7 +282,7 @@ export default function TrainingPlan({ user }) {
                   <div>
                     <h4 className="font-semibold text-lg">{day.day}</h4>
                     <p className="text-sm text-gray-600">
-                      {new Date(day.date).toLocaleDateString('en-US', {
+                      {new Date(day.date + 'T12:00:00Z').toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric'
                       })}
