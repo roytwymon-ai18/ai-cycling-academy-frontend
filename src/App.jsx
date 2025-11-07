@@ -283,11 +283,11 @@ function Dashboard({ user }) {
   return (
     <div className="space-y-6 pb-24">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <h1 className="text-2xl font-bold mb-2 text-gray-900">
           Welcome back, {user.username}! 🚴‍♂️
         </h1>
-        <p className="text-blue-100">
+        <p className="text-gray-600">
           {hasRides 
             ? `You've completed ${summary.total_rides} rides in the last 30 days` 
             : "Ready to upload your first ride and get AI coaching insights?"
@@ -300,7 +300,7 @@ function Dashboard({ user }) {
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col space-y-1">
-              <div className="flex items-center space-x-2 text-blue-600">
+              <div className="flex items-center space-x-2 text-red-600">
                 <Activity className="h-5 w-5" />
                 <p className="text-sm text-gray-600">Rides</p>
               </div>
@@ -312,7 +312,7 @@ function Dashboard({ user }) {
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col space-y-1">
-              <div className="flex items-center space-x-2 text-green-600">
+              <div className="flex items-center space-x-2 text-gray-700">
                 <Mountain className="h-5 w-5" />
                 <p className="text-sm text-gray-600">Distance</p>
               </div>
@@ -327,7 +327,7 @@ function Dashboard({ user }) {
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col space-y-1">
-              <div className="flex items-center space-x-2 text-yellow-600">
+              <div className="flex items-center space-x-2 text-red-600">
                 <Zap className="h-5 w-5" />
                 <p className="text-sm text-gray-600">Avg Power</p>
               </div>
@@ -342,7 +342,7 @@ function Dashboard({ user }) {
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col space-y-1">
-              <div className="flex items-center space-x-2 text-purple-600">
+              <div className="flex items-center space-x-2 text-gray-700">
                 <TrendingUp className="h-5 w-5" />
                 <p className="text-sm text-gray-600">TSS</p>
               </div>
@@ -354,14 +354,14 @@ function Dashboard({ user }) {
 
       {/* FTP Card */}
       {summary.current_ftp && (
-        <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
+        <Card className="bg-red-600 text-white border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-orange-100 text-sm mb-1">Current FTP</p>
+                <p className="text-red-100 text-sm mb-1">Current FTP</p>
                 <p className="text-4xl font-bold">{summary.current_ftp}W</p>
               </div>
-              <Target className="h-12 w-12 text-orange-100" />
+              <Target className="h-12 w-12 text-red-100" />
             </div>
           </CardContent>
         </Card>
@@ -381,8 +381,8 @@ function Dashboard({ user }) {
               {recentRides.map((ride) => (
                 <div key={ride.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center space-x-3 flex-1">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <Activity className="h-4 w-4 text-blue-600" />
+                    <div className="bg-red-50 p-2 rounded-full">
+                      <Activity className="h-4 w-4 text-red-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{ride.name}</p>
@@ -426,7 +426,7 @@ function Dashboard({ user }) {
               <p className="text-gray-600 mb-4">No rides yet. Upload your cycling data to get started!</p>
               <Button 
                 onClick={() => setActiveTab('upload')}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-red-600 hover:bg-red-700"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload First Ride
@@ -514,7 +514,7 @@ function BottomNav({ activeTab, onTabChange }) {
                 onClick={() => onTabChange(tab.id)}
                 className={`flex flex-col items-center py-3 px-4 flex-1 transition-colors ${
                   isActive 
-                    ? 'text-blue-600' 
+                    ? 'text-red-600' 
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -572,7 +572,7 @@ function App() {
             </div>
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               Logout
             </button>
