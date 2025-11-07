@@ -21,7 +21,7 @@ import {
   Calendar,
   Target
 } from 'lucide-react'
-import aiCyclistLogo from './assets/ai_cyclist_logo_dynamic.png'
+import aiCyclistLogo from './assets/logo.png'
 import UploadRides from './components/Upload.jsx'
 import AICoach from './components/Coach.jsx'
 import Analytics from './components/Analytics.jsx'
@@ -133,14 +133,14 @@ function LoginScreen({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-white/20">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-lg border-gray-200">
         <CardHeader className="text-center">
           <img src={aiCyclistLogo} alt="AI Cycling Academy" className="h-16 w-auto mx-auto mb-4" />
-          <CardTitle className="text-2xl text-white">
+          <CardTitle className="text-2xl text-gray-900">
             {isRegisterMode ? 'Create Account' : 'Welcome Back'}
           </CardTitle>
-          <CardDescription className="text-blue-100">
+          <CardDescription className="text-gray-600">
             {isRegisterMode ? 'Join your AI cycling coach' : 'Sign in to your AI cycling coach'}
           </CardDescription>
         </CardHeader>
@@ -152,7 +152,7 @@ function LoginScreen({ onLogin }) {
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-blue-200"
+                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 required
               />
             </div>
@@ -163,7 +163,7 @@ function LoginScreen({ onLogin }) {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-blue-200"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                   required
                 />
               </div>
@@ -180,7 +180,7 @@ function LoginScreen({ onLogin }) {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-200 hover:text-white"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -209,7 +209,7 @@ function LoginScreen({ onLogin }) {
             )}
             <Button 
               type="submit" 
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              className="w-full bg-red-600 hover:bg-red-700 text-white"
               disabled={isLoading}
             >
               {isLoading ? (isRegisterMode ? 'Creating Account...' : 'Signing in...') : (isRegisterMode ? 'Create Account' : 'Sign In')}
@@ -222,15 +222,15 @@ function LoginScreen({ onLogin }) {
                 setError('')
                 setSuccess('')
               }}
-              className="text-blue-200 hover:text-white text-sm underline"
+              className="text-gray-600 hover:text-gray-900 text-sm underline"
             >
               {isRegisterMode ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>
           </div>
           {!isRegisterMode && (
             <div className="mt-4 text-center">
-              <p className="text-blue-200 text-sm mb-2">Demo Accounts:</p>
-              <div className="space-y-1 text-xs text-blue-300">
+              <p className="text-gray-600 text-sm mb-2">Demo Accounts:</p>
+              <div className="space-y-1 text-xs text-gray-500">
                 <p><strong>Demo:</strong> demo / demo123 (with sample data)</p>
                 <p><strong>User:</strong> user / user123 (fresh account)</p>
               </div>
